@@ -53,7 +53,7 @@ if __name__ == "__main__":
         learning_rate = .1
 
     # Comparison model!    
-        """""
+     
     model_no_shuffle = SoftmaxModel(
         neurons_per_layer,
         use_improved_sigmoid,
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     )
     train_history_no_shuffle, val_history_no_shuffle = trainer_shuffle.train(
         num_epochs)
-"""
+
     use_momentum = True
 
     plt.subplot(1, 2, 1)

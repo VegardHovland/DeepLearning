@@ -50,7 +50,7 @@ if __name__ == "__main__":
     use_improved_sigmoid = True
     use_improved_weight_init = True
     use_momentum = True
-    neurons_per_layer = [32, 32, 10]
+    neurons_per_layer = [60, 60, 10]
     if use_momentum:
         learning_rate = .02
     else: 
@@ -67,6 +67,7 @@ if __name__ == "__main__":
     train_history_2, val_history_2 = trainer_2.train(
         num_epochs)
 
+    
     # Comparison model 4e!  
     use_improved_sigmoid = True
     use_improved_weight_init = True
@@ -88,14 +89,13 @@ if __name__ == "__main__":
     )
     train_history_3, val_history_3 = trainer_3.train(
         num_epochs)
-
     
 
     plt.subplot(1, 2, 1)
     utils.plot_loss(train_history["loss"],
                     "Task 3 Model ", npoints_to_average=10)
     utils.plot_loss(
-        train_history_2["loss"], "Task 4d Model - two x 32", npoints_to_average=10)
+        train_history_2["loss"], "Task 4d Model - two x 60", npoints_to_average=10)
     utils.plot_loss(
         train_history_3["loss"], "Task 4e Model - ten x 64", npoints_to_average=10)    
     plt.ylim([0, .4])
@@ -103,12 +103,13 @@ if __name__ == "__main__":
     plt.ylim([0.85, 1])
     utils.plot_loss(val_history["accuracy"], "Task 3 Model")
     utils.plot_loss(
-        val_history_2["accuracy"], "Task 4d Model - two hidden layers, 32 units")
+        val_history_2["accuracy"], "Task 4d Model - two hidden layers, 60 units")
     utils.plot_loss(
         val_history_3["accuracy"], "Task 4e Model - ten x 64 hidden layers")        
     plt.ylabel("Validation Accuracy")
     plt.legend()
     plt.savefig("task4_train_loss_ten_hidden_layers_early_stop.png")
+
     stop = timeit.default_timer()
     print('Running Time: ', stop - start) 
     
