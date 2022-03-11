@@ -16,7 +16,7 @@ def read_json_file(filepath):
 
 
 def read_predicted_boxes():
-    json_file = read_json_file("predicted_boxes.json")
+    json_file = read_json_file("task2/predicted_boxes.json")
     for image_id in json_file.keys():
         scores = np.array(json_file[image_id]["scores"])
         boxes = np.array(json_file[image_id]["boxes"])
@@ -28,7 +28,7 @@ def read_predicted_boxes():
 
 
 def read_ground_truth_boxes():
-    json_file = read_json_file("ground_truth_boxes.json")
+    json_file = read_json_file("task2/ground_truth_boxes.json")
     for image_id in json_file.keys():
         boxes = np.array(json_file[image_id])
         assert boxes.shape[1] == 4

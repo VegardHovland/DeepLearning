@@ -16,11 +16,18 @@ def calculate_iou(prediction_box, gt_box):
             float: value of the intersection of union for the two boxes.
     """
     # YOUR CODE HERE
-
+    #Extract x and y coordinates 
+    x_gt = max (gt_box[0] , prediction_box[0])
+    y_gt = max (gt_box[1] , prediction_box[1])
+    x_pred = min (gt_box[2] , prediction_box[2])
+    y_pred = min (gt_box[3] , prediction_box[3])
     # Compute intersection
-
+    intersect = max(0, x_pred - x_gt + 1) * max(0, y_pred - y_gt + 1)
+    # Compute box area
+    gtArea = (gt_box[2] - gt_box[0] + 1) * (gt_box[3] -gt_box[1] + 1)
+    predArea = (prediction_box[2] - prediction_box[0] + 1) * (prediction_box[3] - prediction_box[1] + 1)
     # Compute union
-    iou = 0
+    iou = intersect / (gtArea + predArea )
     assert iou >= 0 and iou <= 1
     return iou
 
@@ -36,7 +43,9 @@ def calculate_precision(num_tp, num_fp, num_fn):
     Returns:
         float: value of precision
     """
-    raise NotImplementedError
+    if num_tp + num_fp == 0:
+        return 1
+    return num_tp / (num_tp + num_fp)
 
 
 def calculate_recall(num_tp, num_fp, num_fn):
@@ -49,7 +58,10 @@ def calculate_recall(num_tp, num_fp, num_fn):
     Returns:
         float: value of recall
     """
-    raise NotImplementedError
+    if num_tp + num_fn == 0:
+        return 0
+    return num_tp / (num_tp + num_fn)
+
 
 
 def get_all_box_matches(prediction_boxes, gt_boxes, iou_threshold):
@@ -73,15 +85,27 @@ def get_all_box_matches(prediction_boxes, gt_boxes, iou_threshold):
             Each row includes [xmin, ymin, xmax, ymax]
     """
     # Find all possible matches with a IoU >= iou threshold
+    num_true = gt_boxes.size[0]
+    num_pred = prediction_boxes.size[0]
 
+    iou_mat = np.zeros((num_true, num_pred))
+    for pred in range(num_pred):
+        for gt in range(num_true):
+            iou_mat[gt, pred] = calculate_iou(predicted_boxes[pred], gt_boxes[gt])
 
-    # Sort all matches on IoU in descending order
-
-    # Find all matches with the highest IoU threshold
-
-
-
-    return np.array([]), np.array([])
+    # Have matrix of IoU of every pred / truth box match combination
+    # Extract pred boxec based on decreasing IoU
+    pred_match = - np.ones((num_pred, 2))            # Vector that holds the indexes of the matched truth and pred boxes
+    for pred in range(num_pred):
+        iou_val = np.amax(iou_mat)                  # Find max IoU value
+        i_p, i_t = np.where(iou_mat == iou_val)     # Get index for prediction box and truth box
+        if iou_val > iou_threshold:
+            pred_match[i_p,0] = i_p                 # store index of prediction box
+            pred_match[i_p,1] = i_t                 # store index of matched truth box
+            iou_mat[:, i_t] = 0                     # truth box already used set zero
+            iou_mat[i_p, :] = 0                     # pred box already used
+    pred_match[np.where(pred_match == -1)] = None   # If no match, set None
+    return pred_match[1,:], pred_match[2,:]         # Returns predicion vector and truth vector both sorted after decreasing IoU
 
 
 def calculate_individual_image_result(prediction_boxes, gt_boxes, iou_threshold):
@@ -101,7 +125,14 @@ def calculate_individual_image_result(prediction_boxes, gt_boxes, iou_threshold)
         dict: containing true positives, false positives, true negatives, false negatives
             {"true_pos": int, "false_pos": int, false_neg": int}
     """
+    num_true = gt_boxes.size[0]
+    num_pred = prediction_boxes.size[0]
+    pred_match = np.ones(num_pred) 
+    truth_match = np.ones(num_true) 
 
+    pred_match, truth_match = get_all_box_matches(prediction_boxes, gt_boxes, iou_threshold)
+
+    
     raise NotImplementedError
 
 
