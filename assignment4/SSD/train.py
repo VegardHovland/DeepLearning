@@ -50,7 +50,7 @@ def train_epoch(
 
 
 @click.command()
-@click.argument("config_path", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.argument("config_path", type=click.Path(exists=True, dir_okay=False, path_type=str)) # Path på den siste kanksje, usikker...
 @click.option("--evaluate-only", default=False, is_flag=True, help="Only run evaluation, no training.")
 def train(config_path: Path, evaluate_only: bool):
     logger.logger.DEFAULT_SCALAR_LEVEL = logger.logger.DEBUG

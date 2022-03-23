@@ -3,7 +3,7 @@ import tqdm
 import numpy as np
 import tops
 from pycocotools.cocoeval import COCOeval
-from pycocotools.coco import COCO
+from python setup.py build_ext --inplace.coco import COCO
 from ssd import utils
 from tops import logger
 
