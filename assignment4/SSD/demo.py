@@ -43,7 +43,7 @@ def run_demo(config_path: Path, score_threshold: float, image_dir: Path, output_
         boxes[:, [1, 3]] *= height
         boxes, categories, scores = [_.cpu().numpy() for _ in [boxes, categories, scores]]
         drawn_image = draw_boxes(
-            orig_img, boxes, categories, scores).astype(np.uint8)
+            orig_img, boxes, categories - 1, scores).astype(np.uint8)
         im = Image.fromarray(drawn_image)
         output_path = output_dir.joinpath(f"{image_name}.png")
         im.save(output_path)

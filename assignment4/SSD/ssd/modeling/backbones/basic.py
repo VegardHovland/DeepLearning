@@ -14,9 +14,12 @@ class BasicModel(torch.nn.Module):
      shape(-1, output_channels[4], 1, 1)]
     """
     def __init__(self, output_channels: List[int],image_channels: int, output_feature_sizes: List[Tuple[int]]):
+        
         super().__init__()
         self.out_channels = output_channels
         self.output_feature_shape = output_feature_sizes
+        # Task 4a
+        """""
         self.map1 = torch.nn.Sequential(
             torch.torch.nn.Conv2d(image_channels, 32, 3, 1, 1),
             torch.nn.MaxPool2d(2,2),
@@ -63,7 +66,80 @@ class BasicModel(torch.nn.Module):
             torch.nn.ReLU(),
             torch.nn.Conv2d(128, output_channels[5], 3, 1, 0)
         )
+        """""
 
+        
+        # Task 4c   
+        self.map1 = torch.nn.Sequential(
+            torch.torch.nn.Conv2d(image_channels, 32, 3, 1, 1),
+            torch.nn.MaxPool2d(2,2),
+            torch.nn.BatchNorm2d(32),
+
+            torch.nn.ReLU(),
+
+            torch.nn.Conv2d(32, 64, 3, 1, 1),
+            torch.nn.MaxPool2d(2,2),
+            torch.nn.ReLU(),
+
+            torch.nn.Conv2d(64, 64,3, 1, 1),
+            torch.nn.ReLU(),
+            
+            torch.nn.Conv2d(64, output_channels[0], 3, 2, 1)
+        )
+
+        self.map2 = torch.nn.Sequential(
+            torch.nn.ReLU(),
+
+            torch.nn.Conv2d(output_channels[0], 128, 3, 1, 1),
+            torch.nn.BatchNorm2d(128),
+            torch.nn.ReLU(),
+
+            torch.nn.Conv2d(128, output_channels[1], 3, 2, 1)
+        )
+
+        self.map3 = torch.nn.Sequential(
+            torch.nn.ReLU(),
+
+
+            torch.nn.Conv2d(output_channels[1], 256, 3, 1, 1),
+            torch.nn.BatchNorm2d(256),
+            torch.nn.ReLU(),
+
+            torch.nn.Conv2d(256, output_channels[2], 3, 2, 1)
+        )
+
+        self.map4 = torch.nn.Sequential(
+            torch.nn.ReLU(),
+
+            torch.nn.Conv2d(output_channels[2], 128, 3, 1, 1),
+            torch.nn.BatchNorm2d(128),
+            torch.nn.ReLU(),
+
+            torch.nn.Conv2d(128, output_channels[3], 3, 2, 1)
+        )
+
+        self.map5 = torch.nn.Sequential(
+            torch.nn.ReLU(),
+
+            torch.nn.Conv2d(output_channels[3], 128, 3, 1, 1),
+            torch.nn.BatchNorm2d(128),
+            torch.nn.ReLU(),
+
+
+            torch.nn.Conv2d(128, output_channels[4], 3, 2, 1)
+        )
+
+        self.map6 = torch.nn.Sequential(
+            torch.nn.ReLU(),
+
+            torch.nn.Conv2d(output_channels[4], 128, 3, 1, 1),
+            torch.nn.BatchNorm2d(128),
+            torch.nn.ReLU(),
+
+
+            torch.nn.Conv2d(128, output_channels[5], 3, 1, 0)
+        )
+        
 
     def forward(self, x):
         """

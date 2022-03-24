@@ -4,6 +4,7 @@ import functools
 import time
 import click
 import torch
+import pprint
 import tops
 import tqdm
 from pathlib import Path
@@ -12,6 +13,7 @@ from ssd import utils
 from tops.config import instantiate
 from tops import logger, checkpointer
 from torch.optim.lr_scheduler import ChainedScheduler
+from omegaconf import OmegaConf
 torch.backends.cudnn.benchmark = True
 
 def train_epoch(
@@ -46,15 +48,26 @@ def train_epoch(
         # If it happens in the first iteration, scheduler.step() will throw exception
         logger.step()
 
-    return 
+    return
+
+
+def print_config(cfg):
+    container = OmegaConf.to_container(cfg)
+    pp = pprint.PrettyPrinter(indent=2, compact=False)
+    print("--------------------Config file below--------------------")
+    pp.pprint(container)
+    print("--------------------End of config file--------------------")
 
 
 @click.command()
-@click.argument("config_path", type=click.Path(exists=True, dir_okay=False, path_type=str)) # Path på den siste kanksje, usikker...
+@click.argument("config_path", type=click.Path(exists=True, dir_okay=False, path_type=str))         #Path
 @click.option("--evaluate-only", default=False, is_flag=True, help="Only run evaluation, no training.")
+
 def train(config_path: Path, evaluate_only: bool):
     logger.logger.DEFAULT_SCALAR_LEVEL = logger.logger.DEBUG
     cfg = utils.load_config(config_path)
+    print_config(cfg)
+
     tops.init(cfg.output_dir)
     tops.set_AMP(cfg.train.amp)
     tops.set_seed(cfg.train.seed)
@@ -71,11 +84,17 @@ def train(config_path: Path, evaluate_only: bool):
         train_state = checkpointer.load_registered_models(load_best=False)
         total_time = train_state["total_time"]
         logger.log(f"Resuming train from: epoch: {logger.epoch()}, global step: {logger.global_step()}")
-    
+
     gpu_transform_val = instantiate(cfg.data_val.gpu_transform)
     gpu_transform_train = instantiate(cfg.data_train.gpu_transform)
     evaluation_fn = functools.partial(
-        evaluate, model=model, dataloader=dataloader_val, cocoGt=cocoGt, gpu_transform=gpu_transform_val)
+        evaluate,
+        model=model,
+        dataloader=dataloader_val,
+        cocoGt=cocoGt,
+        gpu_transform=gpu_transform_val,
+        label_map=cfg.label_map
+    )
     if evaluate_only:
         evaluation_fn()
         exit()
@@ -84,12 +103,13 @@ def train(config_path: Path, evaluate_only: bool):
     tops.print_module_summary(model, (dummy_input,))
     start_epoch = logger.epoch()
     for epoch in range(start_epoch, cfg.train.epochs):
+        print(optimizer)
         start_epoch_time = time.time()
         train_epoch(model, scaler, optimizer, dataloader_train, scheduler, gpu_transform_train, cfg.train.log_interval)
         end_epoch_time = time.time() - start_epoch_time
         total_time += end_epoch_time
         logger.add_scalar("stats/epoch_time", end_epoch_time)
-        
+
         eval_stats = evaluation_fn()
         eval_stats = {f"metrics/{key}": val for key, val in eval_stats.items()}
         logger.add_dict(eval_stats, level=logger.logger.INFO)
